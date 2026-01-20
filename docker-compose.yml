@@ -7,14 +7,14 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "${MYSQL_DATABASE}"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - akaunting_db_data:/var/lib/mysql
 
   akaunting:
-    image: docker.io/akaunting/akaunting:latest
+    image: akaunting/akaunting:latest
     container_name: akaunting_app
     depends_on:
       - db
@@ -24,14 +24,17 @@ services:
     env_file:
       - .env
     environment:
-      # The setup flag is only needed the first time
       - AKAUNTING_SETUP=${AKAUNTING_SETUP}
+      - LOCALE=${LOCALE}
       - DB_HOST=db
       - DB_PORT=3306
-      - DB_DATABASE=${MYSQL_DATABASE}
-      - DB_USERNAME=${MYSQL_USER}
-      - DB_PASSWORD=${MYSQL_PASSWORD}
-      - APP_URL=${APP_URL}
+      - DB_DATABASE=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - COMPANY_NAME=${COMPANY_NAME}
+      - COMPANY_EMAIL=${COMPANY_EMAIL}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
 
 volumes:
   akaunting_db_data:
