@@ -1,40 +1,50 @@
-version: "3.9"
-
 services:
   db:
     image: mariadb:10.11
     container_name: akaunting_db
-    restart: unless-stopped
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "${DB_NAME}"
-      MYSQL_USER: "${DB_USERNAME}"
-      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: akaunting
+      MYSQL_USER: akaunting
+      MYSQL_PASSWORD: akaunting
     volumes:
-      - akaunting_db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
+    networks:
+      - akaunting_net
 
   akaunting:
     image: akaunting/akaunting:latest
     container_name: akaunting_app
     depends_on:
       - db
+    restart: always
     ports:
-      - "${APP_PORT}:80"
-    restart: unless-stopped
-    env_file:
-      - .env
+      - "8085:80"
     environment:
-      - AKAUNTING_SETUP=${AKAUNTING_SETUP}
-      - LOCALE=${LOCALE}
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=${DB_NAME}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - COMPANY_NAME=${COMPANY_NAME}
-      - COMPANY_EMAIL=${COMPANY_EMAIL}
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: http://localhost:8085
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: akaunting
+      DB_USERNAME: akaunting
+      DB_PASSWORD: akaunting
+      AKAUNTING_SETUP: "true"
+      AKAUNTING_ADMIN_NAME: Admin
+      AKAUNTING_ADMIN_EMAIL: admin@example.com
+      AKAUNTING_ADMIN_PASSWORD: StrongPassword123
+      AKAUNTING_COMPANY_NAME: MyCompany
+    volumes:
+      - app_data:/var/www/html
+    networks:
+      - akaunting_net
 
 volumes:
-  akaunting_db_data:
+  db_data:
+  app_data:
+
+networks:
+  akaunting_net:
+    driver: bridge
